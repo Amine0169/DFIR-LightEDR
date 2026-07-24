@@ -153,6 +153,7 @@
                                 <th>Host</th>
                                 <th>OS</th>
                                 <th>IP</th>
+                                <th>Sysmon</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -162,10 +163,11 @@
                                 <td><strong>{{ h.hostname }}</strong></td>
                                 <td>{{ h.os_type }} {{ h.os_version[:10] if h.os_version else '' }}</td>
                                 <td><code>{{ h.ip_address }}</code></td>
+                                <td>{% if h.sysmon_detected %}<span class="badge badge--low" style="background:#10b981">✅ Sysmon</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
                                 <td><span class="badge badge--{{ 'critical' if h.status == 'inactive' else 'low' if h.status == 'active' else 'medium' }}">{{ h.status }}</span></td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="4" class="text-center text-muted">No hosts registered yet.</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted">No hosts registered yet.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

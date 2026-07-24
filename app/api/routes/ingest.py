@@ -34,11 +34,14 @@ class AgentCollectPayload(BaseModel):
 @router.post("/api/ingest")
 async def ingest_agent_data(payload: AgentCollectPayload, db: Session = Depends(get_db)):
     host = db.query(Host).filter_by(hostname=payload.hostname).first()
+    sysmon_detected = payload.sysmon_status.get("installed", False) if payload.sysmon_status else False
     if host:
         host.last_seen = datetime.now(timezone.utc)
         host.ip_address = payload.ip_address
         host.os_type = payload.os_type
         host.os_version = payload.os_version or host.os_version
+        if sysmon_detected:
+            host.sysmon_detected = True
     else:
         host = Host(
             hostname=payload.hostname,
@@ -49,6 +52,7 @@ async def ingest_agent_data(payload: AgentCollectPayload, db: Session = Depends(
             username=payload.hostname,
             first_seen=datetime.now(timezone.utc),
             last_seen=datetime.now(timezone.utc),
+            sysmon_detected=sysmon_detected,
         )
         db.add(host)
     db.commit()

@@ -20,6 +20,7 @@ class Host(Base):
     first_seen: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     last_seen: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     status: Mapped[str] = mapped_column(String, default="active")
+    sysmon_detected: Mapped[bool] = mapped_column(Boolean, default=False)
 
     sessions: Mapped[List["ScanSession"]] = relationship(back_populates="host", cascade="all, delete-orphan")
 

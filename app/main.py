@@ -48,14 +48,18 @@ async def startup_event():
     from sqlalchemy import text as _text
     try:
         with _engine.connect() as conn:
-            for col, col_type in [("agent_version", "VARCHAR"), ("agent_concept", "VARCHAR"),
+            for table, cols in [
+                ("scan_sessions", [("agent_version", "VARCHAR"), ("agent_concept", "VARCHAR"),
                                    ("kape_targets", "VARCHAR"), ("sysmon_detected", "BOOLEAN"),
-                                   ("sysmon_events", "INTEGER")]:
-                try:
-                    conn.execute(_text(f"ALTER TABLE scan_sessions ADD COLUMN {col} {col_type}"))
-                    conn.commit()
-                except Exception:
-                    pass  # Column already exists
+                                   ("sysmon_events", "INTEGER")]),
+                ("hosts", [("sysmon_detected", "BOOLEAN")]),
+            ]:
+                for col, col_type in cols:
+                    try:
+                        conn.execute(_text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
+                        conn.commit()
+                    except Exception:
+                        pass
     except Exception:
         pass
     logger.info("LightEDR Application Started")
