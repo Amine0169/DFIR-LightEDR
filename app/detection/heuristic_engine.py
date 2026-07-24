@@ -11,10 +11,10 @@ class HeuristicEngine:
     def analyze_processes(self, processes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         alerts = []
         for proc in processes:
-            name = proc.get('name', '').lower()
-            cmdline = proc.get('command_line', '').lower()
-            path = proc.get('path', '').lower()
-            parent_name = proc.get('parent_name', '').lower()
+            name = (proc.get('name') or '').lower()
+            cmdline = (proc.get('command_line') or proc.get('cmdline') or '').lower()
+            path = (proc.get('path') or '').lower()
+            parent_name = (proc.get('parent_name') or '').lower()
 
             # Rule: PowerShell with -enc or -EncodedCommand
             if name in ['powershell.exe', 'pwsh.exe']:
@@ -71,7 +71,7 @@ class HeuristicEngine:
         
         for conn in connections:
             remote_port = conn.get('remote_port')
-            proc_name = conn.get('process_name', '').lower()
+            proc_name = (conn.get('process_name') or '').lower()
             
             # Rule: Known C2 ports
             if remote_port in c2_ports:
@@ -117,7 +117,7 @@ class HeuristicEngine:
     def analyze_scheduled_tasks(self, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         alerts = []
         for task in tasks:
-            action = task.get('action', '').lower()
+            action = (task.get('action') or '').lower()
             
             if 'powershell' in action and ('-enc' in action or 'bypass' in action):
                 alerts.append({
@@ -157,7 +157,7 @@ class HeuristicEngine:
                 
             # Rule: LSASS access (10)
             if event_id == 10:
-                target_image = event.get('target_image', '').lower()
+                target_image = (event.get('target_image') or '').lower()
                 if 'lsass.exe' in target_image:
                     alerts.append({
                         "title": "LSASS Memory Access",
