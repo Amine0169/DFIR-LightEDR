@@ -13,16 +13,16 @@
 
 <div class="card mb-6 animate-slide-up delay-100">
     <div class="card-header flex justify-between items-center" style="border-bottom: none; padding-bottom: 0;">
-        <div class="flex gap-2">
-            <button class="btn btn-primary btn-sm">All (24)</button>
-            <button class="btn btn-outline btn-sm"><span class="badge-dot" style="background:var(--danger-red)"></span> Critical (2)</button>
-            <button class="btn btn-outline btn-sm"><span class="badge-dot" style="background:var(--warning-amber)"></span> High (5)</button>
-            <button class="btn btn-outline btn-sm"><span class="badge-dot" style="background:var(--accent-blue)"></span> Medium (11)</button>
-            <button class="btn btn-outline btn-sm"><span class="badge-dot" style="background:var(--cyber-green)"></span> Low (6)</button>
+        <div class="flex gap-2" id="severity-filters">
+            <button class="btn btn-primary btn-sm filter-btn" data-severity="all">All ({{ alerts|length }})</button>
+            <button class="btn btn-outline btn-sm filter-btn" data-severity="critical"><span class="badge-dot" style="background:var(--danger-red)"></span> Critical</button>
+            <button class="btn btn-outline btn-sm filter-btn" data-severity="high"><span class="badge-dot" style="background:var(--warning-amber)"></span> High</button>
+            <button class="btn btn-outline btn-sm filter-btn" data-severity="medium"><span class="badge-dot" style="background:var(--accent-blue)"></span> Medium</button>
+            <button class="btn btn-outline btn-sm filter-btn" data-severity="low"><span class="badge-dot" style="background:var(--cyber-green)"></span> Low</button>
         </div>
         <div class="search-container" style="width: 250px;">
             <i class="fa-solid fa-filter search-icon"></i>
-            <input type="text" class="search-input" placeholder="Filter alerts...">
+            <input type="text" class="search-input" id="alert-search" placeholder="Filter alerts...">
         </div>
     </div>
     <div class="card-body">
@@ -34,51 +34,68 @@
                         <th>Severity</th>
                         <th>Rule Name</th>
                         <th>Type</th>
-                        <th>Host</th>
+                        <th>MITRE</th>
                         <th>Detected At</th>
-                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td class="font-mono text-muted">#ALT-1042</td>
-                        <td><span class="badge badge--critical"><span class="badge-dot"></span>Critical</span></td>
-                        <td class="font-medium text-primary">Ransomware Behavior Detected</td>
-                        <td><span class="badge badge--outline">YARA</span></td>
-                        <td>DESKTOP-WIN-01</td>
-                        <td>2024-05-24 14:32:01</td>
-                        <td><span class="badge badge--outline">New</span></td>
+                <tbody id="alerts-body">
+                    {% for a in alerts %}
+                    <tr class="alert-row" data-severity="{{ a.severity }}">
+                        <td class="font-mono text-muted">#ALT-{{ a.id }}</td>
+                        <td><span class="badge badge--{{ a.severity }}"><span class="badge-dot"></span>{{ a.severity|capitalize }}</span></td>
+                        <td class="font-medium text-primary">{{ a.rule_name }}</td>
+                        <td><span class="badge badge--outline">{{ a.rule_type }}</span></td>
+                        <td><code>{{ a.mitre_technique_id or '-' }}</code></td>
+                        <td>{{ a.detected_at.strftime('%Y-%m-%d %H:%M:%S') if a.detected_at else '-' }}</td>
                         <td>
-                            <a href="/investigations/1042" class="btn btn-sm btn-ghost"><i class="fa-solid fa-eye"></i> Investigate</a>
+                            <a href="/investigations/{{ a.session_id }}" class="btn btn-sm btn-ghost"><i class="fa-solid fa-eye"></i> Investigate</a>
                         </td>
                     </tr>
-                    <tr>
-                        <td class="font-mono text-muted">#ALT-1041</td>
-                        <td><span class="badge badge--high"><span class="badge-dot"></span>High</span></td>
-                        <td class="font-medium text-primary">Suspicious PowerShell Download</td>
-                        <td><span class="badge badge--outline">Sigma</span></td>
-                        <td>SRV-EXCHANGE-02</td>
-                        <td>2024-05-24 13:15:44</td>
-                        <td><span class="badge badge--outline">In Progress</span></td>
-                        <td>
-                            <a href="/investigations/1041" class="btn btn-sm btn-ghost"><i class="fa-solid fa-eye"></i> Investigate</a>
-                        </td>
-                    </tr>
-                    <!-- Add more rows as needed -->
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted">No alerts yet. Run a scan to detect threats.</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
     <div class="card-footer flex justify-between items-center">
-        <span class="text-sm text-muted">Showing 1 to 10 of 24 alerts</span>
-        <div class="flex gap-2">
-            <button class="btn btn-sm btn-outline" disabled>Previous</button>
-            <button class="btn btn-sm btn-primary">1</button>
-            <button class="btn btn-sm btn-outline">2</button>
-            <button class="btn btn-sm btn-outline">3</button>
-            <button class="btn btn-sm btn-outline">Next</button>
-        </div>
+        <span class="text-sm text-muted">Showing <span id="showing-count">{{ alerts|length }}</span> alerts</span>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const rows = document.querySelectorAll('.alert-row');
+    const searchInput = document.getElementById('alert-search');
+
+    function filterAlerts() {
+        const activeSev = document.querySelector('.filter-btn.btn-primary');
+        const sev = activeSev ? activeSev.dataset.severity : 'all';
+        const q = (searchInput?.value || '').toLowerCase();
+
+        let visible = 0;
+        rows.forEach(row => {
+            const matchSev = sev === 'all' || row.dataset.severity === sev;
+            const matchText = !q || row.textContent.toLowerCase().includes(q);
+            row.style.display = (matchSev && matchText) ? '' : 'none';
+            if (matchSev && matchText) visible++;
+        });
+        document.getElementById('showing-count').textContent = visible;
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.className = b.className.replace('btn-primary', 'btn-outline');
+                b.className = b.className.replace('btn-outline', 'btn-outline');
+            });
+            this.className = this.className.replace('btn-outline', 'btn-primary');
+            filterAlerts();
+        });
+    });
+
+    if (searchInput) searchInput.addEventListener('input', filterAlerts);
+});
+</script>
 {% endblock %}
