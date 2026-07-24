@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% set active_page = "investigations" %}
+{% block title %}Investigation #{{ session.id }}{% endblock %}
+{% block content %}
+<div class="page-header animate-slide-up">
+    <div class="page-title-group">
+        <h1 class="page-title">Investigation #{{ session.id }}</h1>
+        <p class="page-subtitle">Started: {{ session.started_at.strftime('%Y-%m-%d %H:%M:%S') }} | Status: {{ session.status }}</p>
+    </div>
+    <div class="page-actions gap-3">
+        <span class="text-sm text-muted">Artifacts: {{ session.total_artifacts }} | Alerts: {{ session.total_alerts }}</span>
+        <button class="btn btn-primary" onclick="generateReport({{ session.id }})"><i class="fa-solid fa-file-lines"></i> Generate Report</button>
+    </div>
+</div>
+
+{% if session.agent_concept or kape_targets_list %}
+<div class="grid-3 mb-4 animate-slide-up delay-50">
+    {% if session.agent_version %}
+    <div class="card">
+        <div class="card-body flex items-center gap-3">
+            <i class="fa-solid fa-robot text-purple" style="font-size:1.5rem"></i>
+            <div>
+                <div class="text-xs text-muted">Agent Concept</div>
+                <div class="font-semibold text-sm">{{ session.agent_concept or 'Velociraptor-inspired collector' }}</div>
+                <div class="text-xs text-muted">v{{ session.agent_version or '1.0.0' }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if session.sysmon_detected %}
+    <div class="card">
+        <div class="card-body flex items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-green" style="font-size:1.5rem"></i>
+            <div>
+                <div class="text-xs text-muted">Sysmon</div>
+                <div class="font-semibold text-sm text-green">✅ Installed & Active</div>
+                <div class="text-xs text-muted">{{ session.sysmon_events }} events available</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if kape_targets_list %}
+    <div class="card">
+        <div class="card-body flex items-center gap-3">
+            <i class="fa-solid fa-bullseye text-blue" style="font-size:1.5rem"></i>
+            <div>
+                <div class="text-xs text-muted">KAPE Targets ({{ kape_targets_list|length }})</div>
+                <div class="flex flex-wrap gap-1 mt-1">
+                    {% for t in kape_targets_list %}
+                    <span class="badge badge--low text-xs">{{ t }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="grid-2 mb-6 animate-slide-up delay-100">
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fa-solid fa-list text-blue"></i> Alerts ({{ alerts|length }})</h3></div>
+        <div class="card-body p-0">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Severity</th><th>Rule</th><th>MITRE</th><th>Time</th></tr></thead>
+                    <tbody>
+                        {% for a in alerts %}
+                        <tr>
+                            <td><span class="badge badge--{{ a.severity }}">{{ a.severity }}</span></td>
+                            <td>{{ a.rule_name }}</td>
+                            <td>{% if a.mitre_technique_id %}<code>{{ a.mitre_technique_id }}</code>{% else %}-{% endif %}</td>
+                            <td>{{ a.detected_at.strftime('%H:%M:%S') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted">No alerts in this session.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="flex-col gap-6">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fa-solid fa-microchip text-blue"></i> Processes ({{ processes|length }})</h3></div>
+            <div class="card-body p-0 max-h-64 overflow-auto">
+                <table class="data-table">
+                    <thead><tr><th>PID</th><th>Name</th><th>User</th></tr></thead>
+                    <tbody>
+                        {% for p in processes %}
+                        <tr class="{{ 'row-suspicious' if p.is_suspicious }}">
+                            <td>{{ p.pid }}</td><td>{{ p.name }}</td><td>{{ p.username or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fa-solid fa-network-wired text-blue"></i> Network ({{ connections|length }})</h3></div>
+            <div class="card-body p-0 max-h-64 overflow-auto">
+                <table class="data-table">
+                    <thead><tr><th>Local</th><th>Remote</th><th>Process</th></tr></thead>
+                    <tbody>
+                        {% for c in connections %}
+                        <tr><td>{{ c.local_ip }}:{{ c.local_port }}</td><td>{{ c.remote_ip }}:{{ c.remote_port }}</td><td>{{ c.process_name or '-' }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card animate-slide-up delay-200">
+    <div class="card-header"><h3 class="card-title"><i class="fa-solid fa-bookmark text-blue"></i> Registry Persistence ({{ registry|length }})</h3></div>
+    <div class="card-body p-0">
+        <table class="data-table">
+            <thead><tr><th>Hive</th><th>Key Path</th><th>Value</th><th>Data</th></tr></thead>
+            <tbody>
+                {% for r in registry %}
+                <tr><td>{{ r.hive }}</td><td><code>{{ r.key_path }}</code></td><td>{{ r.value_name }}</td><td class="text-muted text-sm">{{ r.value_data[:80] }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function generateReport(sessionId) {
+    const resp = await fetch(`/api/reports/generate/${sessionId}`, { method: 'POST' });
+    const data = await resp.json();
+    if (data.report_id) window.location.href = `/reports/${data.report_id}`;
+}
+</script>
+{% endblock %}

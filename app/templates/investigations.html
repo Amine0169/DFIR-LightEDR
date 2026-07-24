@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% set active_page = "investigations" %}
+{% block title %}Investigations{% endblock %}
+{% block content %}
+<div class="page-header animate-slide-up">
+    <div class="page-title-group">
+        <h1 class="page-title">Investigations</h1>
+        <p class="page-subtitle">Scan sessions and investigation history.</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-primary" id="btnNewScan"><i class="fa-solid fa-crosshairs"></i> New Scan</button>
+    </div>
+</div>
+<div class="card animate-slide-up delay-100">
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Session ID</th>
+                        <th>Host</th>
+                        <th>Started</th>
+                        <th>Completed</th>
+                        <th>Status</th>
+                        <th>Artifacts</th>
+                        <th>Alerts</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sessions %}
+                    <tr>
+                        <td><strong>#{{ s.id }}</strong></td>
+                        <td>{{ s.host.hostname if s.host else 'N/A' }}</td>
+                        <td>{{ s.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ s.completed_at.strftime('%Y-%m-%d %H:%M') if s.completed_at else '-' }}</td>
+                        <td><span class="badge badge--{{ 'success' if s.status == 'completed' else 'warning' }}">{{ s.status }}</span></td>
+                        <td>{{ s.total_artifacts }}</td>
+                        <td>{{ s.total_alerts }}</td>
+                        <td><a href="/investigations/{{ s.id }}" class="btn btn-sm btn-ghost"><i class="fa-solid fa-chevron-right"></i> View</a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8" class="text-center text-muted">No investigations yet. Run a scan to start.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('btnNewScan')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btnNewScan');
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Scanning...';
+    const resp = await fetch('/api/scan', { method: 'POST' });
+    const data = await resp.json();
+    window.location.href = `/investigations/${data.session_id}`;
+});
+</script>
+{% endblock %}

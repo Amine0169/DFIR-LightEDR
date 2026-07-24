@@ -1,0 +1,71 @@
+title: Suspicious PowerShell Execution
+id: 1a2b3c4d-1234-5678-9abc-def012345678
+status: experimental
+description: Detects suspicious PowerShell execution patterns
+author: LightEDR
+logsource:
+    product: windows
+    service: powershell
+detection:
+    selection_encoded:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - '-enc'
+            - '-encodedcommand'
+            - 'bypass'
+    selection_download:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - 'DownloadString'
+            - 'DownloadFile'
+            - 'WebClient'
+    condition: selection_encoded or selection_download
+level: high
+tags:
+    - attack.execution
+    - attack.t1059.001
+---
+title: Suspicious Process Creation
+id: 2b3c4d5e-2345-6789-abcd-ef0123456789
+status: experimental
+description: Detects processes spawned from unusual parent processes
+author: LightEDR
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1
+        ParentImage|endswith:
+            - '\wmiprvse.exe'
+            - '\svchost.exe'
+        Image|endswith:
+            - '\powershell.exe'
+            - '\cmd.exe'
+            - '\rundll32.exe'
+    condition: selection
+level: high
+tags:
+    - attack.execution
+    - attack.t1059
+---
+title: Registry Persistence Detection
+id: 3c4d5e6f-3456-789a-bcde-f0123456789a
+status: experimental
+description: Detects modifications to registry persistence keys
+author: LightEDR
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 12
+        TargetObject|contains:
+            - '\CurrentVersion\Run'
+            - '\CurrentVersion\RunOnce'
+            - '\Windows\CurrentVersion\Run'
+    condition: selection
+level: medium
+tags:
+    - attack.persistence
+    - attack.t1547.001

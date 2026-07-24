@@ -1,1 +1,11 @@
-temp.log
+venv
+__pycache__
+*.pyc
+.env
+*.db
+logs/
+.idea
+.vscode
+*.egg-info
+dist
+build

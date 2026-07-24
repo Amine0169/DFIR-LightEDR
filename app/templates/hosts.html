@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set active_page = "hosts" %}
+{% block title %}Hosts{% endblock %}
+{% block content %}
+<div class="page-header animate-slide-up">
+    <div class="page-title-group">
+        <h1 class="page-title">Monitored Hosts</h1>
+        <p class="page-subtitle">Endpoint inventory and status overview.</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-primary" id="btnRefresh"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+    </div>
+</div>
+<div class="card animate-slide-up delay-100">
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Hostname</th>
+                        <th>OS</th>
+                        <th>IP Address</th>
+                        <th>Status</th>
+                        <th>Last Seen</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for host in hosts %}
+                    <tr>
+                        <td><strong>{{ host.hostname }}</strong></td>
+                        <td>{{ host.os_type }} {{ host.os_version or '' }}</td>
+                        <td><code>{{ host.ip_address }}</code></td>
+                        <td><span class="badge badge--{{ 'success' if host.status == 'active' else 'warning' }}">{{ host.status }}</span></td>
+                        <td>{{ host.last_seen.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td><a href="/investigations?host_id={{ host.id }}" class="btn btn-sm btn-ghost"><i class="fa-solid fa-search"></i></a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted">No hosts found. Run a scan to register a host.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

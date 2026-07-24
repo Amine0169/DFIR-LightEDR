@@ -1,0 +1,5 @@
+# Known Malicious Domains
+# Format: domain,source
+evil.example.com,ThreatFeed
+malware.download.example,ThreatFeed
+c2.powershell.example,ThreatFeed

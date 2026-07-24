@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set active_page = "reports" %}
+{% block title %}Report: {{ report.title }}{% endblock %}
+{% block content %}
+<div class="page-header animate-slide-up">
+    <div class="page-title-group">
+        <h1 class="page-title">{{ report.title }}</h1>
+        <p class="page-subtitle">Generated: {{ report.generated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+    <div class="page-actions">
+        <span class="badge badge--{{ report.risk_level|lower }} text-lg mr-3">{{ report.risk_level }} ({{ report.overall_risk_score }}/100)</span>
+    </div>
+</div>
+
+<div class="grid-4 mb-6 animate-slide-up delay-100">
+    <div class="card stat-card stat-card--red"><div class="stat-content"><span class="stat-label">Critical</span><span class="stat-value">{{ report.total_critical }}</span></div></div>
+    <div class="card stat-card stat-card--amber"><div class="stat-content"><span class="stat-label">High</span><span class="stat-value">{{ report.total_high }}</span></div></div>
+    <div class="card stat-card stat-card--blue"><div class="stat-content"><span class="stat-label">Medium</span><span class="stat-value">{{ report.total_medium }}</span></div></div>
+    <div class="card stat-card stat-card--green"><div class="stat-content"><span class="stat-label">Low</span><span class="stat-value">{{ report.total_low }}</span></div></div>
+</div>
+
+<div class="card mb-6 animate-slide-up delay-200">
+    <div class="card-header"><h3 class="card-title"><i class="fa-solid fa-file-lines text-blue"></i> Executive Summary</h3></div>
+    <div class="card-body">
+        <p>{{ report.summary or 'No summary available.' }}</p>
+    </div>
+</div>
+
+<div class="card animate-slide-up delay-300">
+    <div class="card-header"><h3 class="card-title"><i class="fa-solid fa-list text-blue"></i> Alert Details</h3></div>
+    <div class="card-body p-0">
+        <table class="data-table">
+            <thead><tr><th>Severity</th><th>Rule</th><th>Type</th><th>MITRE Technique</th><th>Risk Score</th><th>Time</th></tr></thead>
+            <tbody>
+                {% for a in alerts %}
+                <tr>
+                    <td><span class="badge badge--{{ a.severity }}">{{ a.severity }}</span></td>
+                    <td>{{ a.rule_name }}</td>
+                    <td>{{ a.rule_type }}</td>
+                    <td>{% if a.mitre_technique_id %}<code>{{ a.mitre_technique_id }}</code>{% else %}-{% endif %}</td>
+                    <td>{{ a.risk_score }}</td>
+                    <td>{{ a.detected_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted">No alerts in this report.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-4 text-center">
+    <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-download"></i> Download Report (Print to PDF)</button>
+</div>
+{% endblock %}

@@ -1,0 +1,236 @@
+{
+  "techniques": {
+    "T1059": {
+      "name": "Command and Scripting Interpreter",
+      "tactic": "Execution",
+      "description": "Adversaries may abuse command and script interpreters to execute commands",
+      "severity": "high",
+      "subtechniques": {
+        "T1059.001": {"name": "PowerShell", "description": "Adversaries may abuse PowerShell commands and scripts for execution."},
+        "T1059.003": {"name": "Windows Command Shell", "description": "Adversaries may abuse the Windows command shell for execution."}
+      }
+    },
+    "T1204": {
+      "name": "User Execution",
+      "tactic": "Execution",
+      "description": "Adversaries may rely upon specific actions by a user in order to gain execution.",
+      "severity": "medium",
+      "subtechniques": {
+        "T1204.002": {"name": "Malicious File", "description": "Adversaries may rely upon a user opening a malicious file."}
+      }
+    },
+    "T1053": {
+      "name": "Scheduled Task/Job",
+      "tactic": "Execution",
+      "description": "Adversaries may abuse task scheduling functionality to facilitate initial or recurring execution.",
+      "severity": "medium",
+      "subtechniques": {
+        "T1053.005": {"name": "Scheduled Task", "description": "Adversaries may abuse the Windows Task Scheduler."}
+      }
+    },
+    "T1547": {
+      "name": "Boot or Logon Autostart Execution",
+      "tactic": "Persistence",
+      "description": "Adversaries may configure system settings to automatically execute a program during boot or logon.",
+      "severity": "medium",
+      "subtechniques": {
+        "T1547.001": {"name": "Registry Run Keys / Startup Folder", "description": "Adversaries may achieve persistence by adding a program to a startup folder or referencing it with a Registry run key."}
+      }
+    },
+    "T1543": {
+      "name": "Create or Modify System Process",
+      "tactic": "Persistence",
+      "description": "Adversaries may create or modify system-level processes to repeatedly execute malicious payloads.",
+      "severity": "high",
+      "subtechniques": {
+        "T1543.003": {"name": "Windows Service", "description": "Adversaries may create or modify Windows services to repeatedly execute malicious payloads."}
+      }
+    },
+    "T1136": {
+      "name": "Create Account",
+      "tactic": "Persistence",
+      "description": "Adversaries may create an account to maintain access to victim systems.",
+      "severity": "high"
+    },
+    "T1548": {
+      "name": "Abuse Elevation Control Mechanism",
+      "tactic": "Privilege Escalation",
+      "description": "Adversaries may circumvent mechanisms designed to control elevate privileges.",
+      "severity": "high"
+    },
+    "T1134": {
+      "name": "Access Token Manipulation",
+      "tactic": "Privilege Escalation",
+      "description": "Adversaries may modify access tokens to operate under a different user or system security context.",
+      "severity": "high"
+    },
+    "T1070": {
+      "name": "Indicator Removal",
+      "tactic": "Defense Evasion",
+      "description": "Adversaries may delete or modify artifacts generated within systems to remove evidence of their presence.",
+      "severity": "medium"
+    },
+    "T1036": {
+      "name": "Masquerading",
+      "tactic": "Defense Evasion",
+      "description": "Adversaries may attempt to manipulate features of their artifacts to make them appear legitimate.",
+      "severity": "medium",
+      "subtechniques": {
+        "T1036.005": {"name": "Match Legitimate Name or Location", "description": "Adversaries may match or approximate the name or location of legitimate files or resources."}
+      }
+    },
+    "T1027": {
+      "name": "Obfuscated Files or Information",
+      "tactic": "Defense Evasion",
+      "description": "Adversaries may attempt to make an executable or file difficult to discover or analyze by encrypting, encoding, or otherwise obfuscating its contents.",
+      "severity": "medium"
+    },
+    "T1218": {
+      "name": "System Binary Proxy Execution",
+      "tactic": "Defense Evasion",
+      "description": "Adversaries may bypass process and/or signature-based defenses by proxying execution of malicious content with signed, or otherwise trusted, binaries.",
+      "severity": "medium"
+    },
+    "T1564": {
+      "name": "Hide Artifacts",
+      "tactic": "Defense Evasion",
+      "description": "Adversaries may attempt to hide artifacts associated with their behaviors to evade detection.",
+      "severity": "medium"
+    },
+    "T1003": {
+      "name": "OS Credential Dumping",
+      "tactic": "Credential Access",
+      "description": "Adversaries may attempt to dump credentials to obtain account login and credential material.",
+      "severity": "high",
+      "subtechniques": {
+        "T1003.001": {"name": "LSASS Memory", "description": "Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS)."}
+      }
+    },
+    "T1110": {
+      "name": "Brute Force",
+      "tactic": "Credential Access",
+      "description": "Adversaries may use brute force techniques to gain access to accounts.",
+      "severity": "medium"
+    },
+    "T1555": {
+      "name": "Credentials from Password Stores",
+      "tactic": "Credential Access",
+      "description": "Adversaries may search for common password storage locations to obtain user credentials.",
+      "severity": "medium"
+    },
+    "T1082": {
+      "name": "System Information Discovery",
+      "tactic": "Discovery",
+      "description": "An adversary may attempt to get detailed information about the operating system and hardware.",
+      "severity": "low"
+    },
+    "T1083": {
+      "name": "File and Directory Discovery",
+      "tactic": "Discovery",
+      "description": "Adversaries may enumerate files and directories or may search in specific locations of a host or network share.",
+      "severity": "low"
+    },
+    "T1057": {
+      "name": "Process Discovery",
+      "tactic": "Discovery",
+      "description": "Adversaries may attempt to get information about running processes on a system.",
+      "severity": "low"
+    },
+    "T1049": {
+      "name": "System Network Connections Discovery",
+      "tactic": "Discovery",
+      "description": "Adversaries may attempt to get a listing of network connections to or from the compromised system.",
+      "severity": "low"
+    },
+    "T1016": {
+      "name": "System Network Configuration Discovery",
+      "tactic": "Discovery",
+      "description": "Adversaries may look for details about the network configuration and settings.",
+      "severity": "low"
+    },
+    "T1018": {
+      "name": "Remote System Discovery",
+      "tactic": "Discovery",
+      "description": "Adversaries may attempt to get a listing of other systems by IP address, hostname, or other logical identifier.",
+      "severity": "low"
+    },
+    "T1021": {
+      "name": "Remote Services",
+      "tactic": "Lateral Movement",
+      "description": "Adversaries may use Valid Accounts to log into a service specifically designed to accept remote connections.",
+      "severity": "high"
+    },
+    "T1570": {
+      "name": "Lateral Tool Transfer",
+      "tactic": "Lateral Movement",
+      "description": "Adversaries may transfer tools or other files from one system to another to compromise the target system.",
+      "severity": "medium"
+    },
+    "T1005": {
+      "name": "Data from Local System",
+      "tactic": "Collection",
+      "description": "Adversaries may search local system sources, such as file systems and databases, to find files of interest.",
+      "severity": "medium"
+    },
+    "T1113": {
+      "name": "Screen Capture",
+      "tactic": "Collection",
+      "description": "Adversaries may attempt to take screen captures of the desktop to gather information over the course of an operation.",
+      "severity": "medium"
+    },
+    "T1071": {
+      "name": "Application Layer Protocol",
+      "tactic": "Command and Control",
+      "description": "Adversaries may communicate using OSI application layer protocols to avoid detection/network filtering.",
+      "severity": "high"
+    },
+    "T1095": {
+      "name": "Non-Application Layer Protocol",
+      "tactic": "Command and Control",
+      "description": "Adversaries may use an OSI non-application layer protocol for communication.",
+      "severity": "high"
+    },
+    "T1572": {
+      "name": "Protocol Tunneling",
+      "tactic": "Command and Control",
+      "description": "Adversaries may tunnel network communications to and from a victim system within a separate protocol.",
+      "severity": "high"
+    },
+    "T1573": {
+      "name": "Encrypted Channel",
+      "tactic": "Command and Control",
+      "description": "Adversaries may employ a known encryption algorithm to conceal command and control traffic rather than relying on any inherent protections provided by a communication protocol.",
+      "severity": "high"
+    },
+    "T1041": {
+      "name": "Exfiltration Over C2 Channel",
+      "tactic": "Exfiltration",
+      "description": "Adversaries may steal data by exfiltrating it over an existing command and control channel.",
+      "severity": "high"
+    },
+    "T1048": {
+      "name": "Exfiltration Over Alternative Protocol",
+      "tactic": "Exfiltration",
+      "description": "Adversaries may steal data by exfiltrating it over a different protocol than that of the existing command and control channel.",
+      "severity": "high"
+    },
+    "T1486": {
+      "name": "Data Encrypted for Impact",
+      "tactic": "Impact",
+      "description": "Adversaries may encrypt data on target systems or on large numbers of systems in a network to interrupt availability to system and network resources.",
+      "severity": "critical"
+    },
+    "T1489": {
+      "name": "Service Stop",
+      "tactic": "Impact",
+      "description": "Adversaries may stop or disable services on a system to render those services unavailable to legitimate users.",
+      "severity": "high"
+    },
+    "T1529": {
+      "name": "System Shutdown/Reboot",
+      "tactic": "Impact",
+      "description": "Adversaries may shutdown/reboot systems to interrupt access to, or aid in the destruction of, those systems.",
+      "severity": "high"
+    }
+  }
+}

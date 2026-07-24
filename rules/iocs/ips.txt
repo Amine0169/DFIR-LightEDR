@@ -1,0 +1,5 @@
+# Known Malicious IPs
+# Format: ip,source
+185.130.5.10,AlienVault
+45.33.32.156,AbuseCH
+185.220.101.0,TorExitNode

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% set active_page = "mitre" %}
+
+{% block title %}MITRE ATT&CK Coverage{% endblock %}
+
+{% block content %}
+<div class="page-header animate-slide-up">
+    <div class="page-title-group">
+        <h1 class="page-title">MITRE ATT&CK® Matrix</h1>
+        <p class="page-subtitle">Detection coverage mapped to the ATT&CK framework.</p>
+    </div>
+</div>
+
+<div class="card mb-6 animate-slide-up delay-100">
+    <div class="card-body p-0">
+        <div class="mitre-grid p-4">
+            <!-- Tactic: Initial Access -->
+            <div class="mitre-tactic">
+                <div class="mitre-tactic-header">Initial Access</div>
+                <div class="mitre-techniques">
+                    <div class="mitre-technique detected-high">T1190: Exploit Public-Facing App</div>
+                    <div class="mitre-technique detected-low">T1566: Phishing</div>
+                    <div class="mitre-technique">T1078: Valid Accounts</div>
+                </div>
+            </div>
+            
+            <!-- Tactic: Execution -->
+            <div class="mitre-tactic">
+                <div class="mitre-tactic-header">Execution</div>
+                <div class="mitre-techniques">
+                    <div class="mitre-technique detected-high">T1059: Command and Scripting</div>
+                    <div class="mitre-technique detected-medium">T1047: WMI</div>
+                    <div class="mitre-technique">T1053: Scheduled Task</div>
+                </div>
+            </div>
+            
+            <!-- Tactic: Persistence -->
+            <div class="mitre-tactic">
+                <div class="mitre-tactic-header">Persistence</div>
+                <div class="mitre-techniques">
+                    <div class="mitre-technique detected-medium">T1547: Registry Run Keys</div>
+                    <div class="mitre-technique">T1543: Create or Modify System Process</div>
+                </div>
+            </div>
+            
+            <!-- Tactic: Privilege Escalation -->
+            <div class="mitre-tactic">
+                <div class="mitre-tactic-header">Privilege Escalation</div>
+                <div class="mitre-techniques">
+                    <div class="mitre-technique detected-low">T1548: Abuse Elevation Control</div>
+                    <div class="mitre-technique">T1134: Access Token Manipulation</div>
+                </div>
+            </div>
+            
+            <!-- Tactic: Defense Evasion -->
+            <div class="mitre-tactic">
+                <div class="mitre-tactic-header">Defense Evasion</div>
+                <div class="mitre-techniques">
+                    <div class="mitre-technique detected-high">T1562: Impair Defenses</div>
+                    <div class="mitre-technique detected-medium">T1070: Indicator Removal</div>
+                    <div class="mitre-technique detected-high">T1027: Obfuscated Files</div>
+                </div>
+            </div>
+            
+             <!-- Tactic: Credential Access -->
+             <div class="mitre-tactic">
+                <div class="mitre-tactic-header">Credential Access</div>
+                <div class="mitre-techniques">
+                    <div class="mitre-technique detected-high">T1003: OS Credential Dumping</div>
+                    <div class="mitre-technique">T1555: Credentials from Password Stores</div>
+                </div>
+            </div>
+            
+            <!-- More tactics can be added here following the same structure -->
+        </div>
+    </div>
+</div>
+{% endblock %}

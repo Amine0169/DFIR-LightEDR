@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - LightEDR</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-bolt"></i> LightEDR
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="/" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </a>
+                    <a href="/alerts" class="nav-item {% if active_page == 'alerts' %}active{% endif %}">
+                        <i class="fa-solid fa-bell"></i> Alerts
+                        <span class="nav-badge">12</span>
+                    </a>
+                    <a href="/hosts" class="nav-item {% if active_page == 'hosts' %}active{% endif %}">
+                        <i class="fa-solid fa-server"></i> Hosts
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Analysis</div>
+                    <a href="/investigations" class="nav-item {% if active_page == 'investigations' %}active{% endif %}">
+                        <i class="fa-solid fa-magnifying-glass"></i> Investigations
+                    </a>
+                    <a href="/mitre" class="nav-item {% if active_page == 'mitre' %}active{% endif %}">
+                        <i class="fa-solid fa-shield-halved"></i> MITRE ATT&CK
+                    </a>
+                    <a href="/reports" class="nav-item {% if active_page == 'reports' %}active{% endif %}">
+                        <i class="fa-solid fa-file-lines"></i> Reports
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="/settings" class="nav-item">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </a>
+                <a href="/docs" class="nav-item">
+                    <i class="fa-solid fa-book"></i> Documentation
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="search-container">
+                    <i class="fa-solid fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search hosts, IPs, hashes...">
+                </div>
+                
+                <div class="topbar-actions">
+                    <div class="system-status">
+                        <div class="status-dot"></div>
+                        System Online
+                    </div>
+                    
+                    <button class="icon-btn" title="Notifications">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="notification-badge">{{ total_alerts if total_alerts is defined else 0 }}</span>
+                    </button>
+                    
+                    <div class="user-profile">
+                        <div class="avatar">{{ user_initials if user_initials is defined else 'AA' }}</div>
+                        <div class="user-info">
+                            <span class="user-name">{{ user_name if user_name is defined else 'Amine Annabi' }}</span>
+                            <span class="user-role">{{ user_role if user_role is defined else 'SOC Analyst' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Live notification badge
+    fetch('/api/stats').then(r=>r.json()).then(d=>{
+        const badge = document.querySelector('.notification-badge');
+        if(badge) {
+            const total = Object.values(d.alerts_by_severity||{}).reduce((a,b)=>a+b,0);
+            badge.textContent = total;
+        }
+    }).catch(()=>{});
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

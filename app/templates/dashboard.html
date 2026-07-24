@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header animate-slide-up">
+    <div class="page-title-group">
+        <h1 class="page-title">Security Dashboard</h1>
+        <p class="page-subtitle">Overview of your environment's security posture.</p>
+    </div>
+    <div class="page-actions flex gap-3">
+        <span class="text-sm text-muted flex items-center mr-4">
+            <i class="fa-solid fa-clock mr-2"></i> <span id="last-updated">Loading...</span>
+        </span>
+        <button class="btn btn-outline" id="btnRefresh">
+            <i class="fa-solid fa-rotate-right"></i> Refresh
+        </button>
+        <button class="btn btn-primary" id="btnNewScan">
+            <i class="fa-solid fa-crosshairs"></i> New Scan
+        </button>
+    </div>
+</div>
+
+<div class="grid-4 mb-6 animate-slide-up delay-100">
+    <div class="card stat-card stat-card--blue">
+        <div class="stat-content">
+            <span class="stat-label">Monitored Hosts</span>
+            <span class="stat-value" id="kpi-hosts">{{ total_hosts }}</span>
+            <span class="stat-trend positive"><i class="fa-solid fa-server"></i> {{ latest_scan.host.hostname if latest_scan and latest_scan.host else 'No host' }}</span>
+        </div>
+        <div class="stat-icon"><i class="fa-solid fa-server"></i></div>
+    </div>
+
+    <div class="card stat-card stat-card--red">
+        <div class="stat-content">
+            <span class="stat-label">Active Alerts</span>
+            <span class="stat-value" id="kpi-alerts">{{ total_alerts }}</span>
+            <span class="stat-trend negative"><i class="fa-solid fa-triangle-exclamation"></i> Last scan: {{ latest_scan.started_at.strftime('%H:%M') if latest_scan else 'Never' }}</span>
+        </div>
+        <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    </div>
+
+    <div class="card stat-card stat-card--amber">
+        <div class="stat-content">
+            <span class="stat-label">Scans Completed</span>
+            <span class="stat-value" id="kpi-scans">{{ total_scans }}</span>
+            <span class="stat-trend neutral"><i class="fa-solid fa-radar"></i> {{ latest_scan.status if latest_scan else 'No scans' }}</span>
+        </div>
+        <div class="stat-icon"><i class="fa-solid fa-radar"></i></div>
+    </div>
+
+    <div class="card stat-card stat-card--purple">
+        <div class="stat-content">
+            <span class="stat-label">Last Scan Artifacts</span>
+            <span class="stat-value" style="font-size:1.4rem">{{ latest_scan.total_artifacts if latest_scan else 0 }}</span>
+            <span class="stat-trend positive"><i class="fa-solid fa-microchip"></i> artifacts collected</span>
+        </div>
+        <div class="stat-icon"><i class="fa-solid fa-database"></i></div>
+    </div>
+</div>
+
+<div class="grid-2 mb-6 animate-slide-up delay-200">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa-solid fa-chart-pie text-blue"></i> Alert Severity Distribution</h3>
+        </div>
+        <div class="card-body">
+            <div class="chart-container chart-container-sm">
+                <canvas id="severityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa-solid fa-chart-line text-blue"></i> Detection Trend</h3>
+        </div>
+        <div class="card-body">
+            <div class="chart-container chart-container-sm">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2 mb-6 animate-slide-up delay-300" style="grid-template-columns: 3fr 2fr;">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa-solid fa-list text-blue"></i> Recent Alerts</h3>
+            <a href="/alerts" class="btn btn-sm btn-ghost">View All</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-container">
+                <table class="data-table" id="alerts-table">
+                    <thead>
+                        <tr>
+                            <th>Severity</th>
+                            <th>Rule / Threat</th>
+                            <th>MITRE</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in recent_alerts %}
+                        <tr>
+                            <td><span class="badge badge--{{ a.severity }}"><span class="badge-dot"></span>{{ a.severity }}</span></td>
+                            <td>{{ a.rule_name }}</td>
+                            <td><code>{{ a.mitre_technique_id or '-' }}</code></td>
+                            <td>{{ a.detected_at.strftime('%H:%M:%S') if a.detected_at else '-' }}</td>
+                            <td><a href="/alerts" class="table-action"><i class="fa-solid fa-chevron-right"></i></a></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center text-muted">No alerts yet. Run a scan to detect threats.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-col gap-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-gauge text-blue"></i> Overall Risk</h3>
+            </div>
+            <div class="card-body risk-gauge-container">
+                <div class="gauge">
+                    <svg class="gauge-svg" viewBox="0 0 150 150">
+                        <circle class="gauge-bg" cx="75" cy="75" r="60"></circle>
+                        <circle class="gauge-progress {{ 'high' if total_alerts > 10 else 'medium' if total_alerts > 0 else 'low' }}" cx="75" cy="75" r="60" style="stroke-dashoffset: {{ 376 - (total_alerts * 3.76) if total_alerts < 100 else 0 }};"></circle>
+                    </svg>
+                    <div class="gauge-text">
+                        <div class="gauge-value" id="gauge-value">{{ total_alerts }}</div>
+                        <div class="gauge-label">{{ 'Elevated' if total_alerts > 10 else 'Moderate' if total_alerts > 0 else 'No Data' }}</div>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-secondary mt-4">{{ latest_scan.status if latest_scan else 'Run a scan to assess your security posture.' }}</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-server text-blue"></i> Monitored Machines</h3>
+                <a href="/hosts" class="btn btn-sm btn-ghost">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Host</th>
+                                <th>OS</th>
+                                <th>IP</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in hosts %}
+                            <tr>
+                                <td><strong>{{ h.hostname }}</strong></td>
+                                <td>{{ h.os_type }} {{ h.os_version[:10] if h.os_version else '' }}</td>
+                                <td><code>{{ h.ip_address }}</code></td>
+                                <td><span class="badge badge--{{ 'critical' if h.status == 'inactive' else 'low' if h.status == 'active' else 'medium' }}">{{ h.status }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center text-muted">No hosts registered yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>document.getElementById('last-updated').textContent = new Date().toLocaleString();</script>
+<script src="/static/js/charts.js"></script>
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}
